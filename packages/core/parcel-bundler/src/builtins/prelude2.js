@@ -1,5 +1,8 @@
 function getGlobalObject(){
-  return typeof window !== 'undefined' ? window : global;
+  if (typeof self !== 'undefined') { return self; } // eg. Web Worker
+  if (typeof window !== 'undefined') { return window; } // eg. browser, Deno
+  if (typeof global !== 'undefined') { return global; } // eg. Node
+  throw Error('Cannot find any global object');
 }
 getGlobalObject().parcelRequire = (function (init) {
   // Save the require from previous bundle to this closure if any

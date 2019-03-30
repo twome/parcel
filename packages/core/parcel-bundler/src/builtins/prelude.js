@@ -1,3 +1,10 @@
+function getGlobalObject(){
+  if (typeof self !== 'undefined') { return self; } // eg. Web Worker
+  if (typeof window !== 'undefined') { return window; } // eg. browser, Deno
+  if (typeof global !== 'undefined') { return global; } // eg. Node
+  throw Error('Cannot find any global object');
+}
+
 // modules are defined as an array
 // [ module function, map of requires ]
 //
@@ -5,9 +12,6 @@
 //
 // anything defined in a previous bundle is accessed via the
 // orig method which is the require for previous bundles
-function getGlobalObject(){
-  return typeof window !== 'undefined' ? window : global;
-}
 getGlobalObject().parcelRequire = (function (modules, cache, entry, globalName) {
   // Save the require from previous bundle to this closure if any
   var previousRequire = typeof getGlobalObject().parcelRequire === 'function' && getGlobalObject().parcelRequire;
@@ -47,7 +51,8 @@ getGlobalObject().parcelRequire = (function (modules, cache, entry, globalName) 
 
       var module = cache[name] = new newRequire.Module(name);
 
-      modules[name][0].call(module.exports, localRequire, module, module.exports, this);
+      var moduleFunction = modules[name][0]
+      moduleFunction.call(module.exports, localRequire, module, module.exports, this);
     }
 
     return cache[name].exports;
@@ -101,12 +106,13 @@ getGlobalObject().parcelRequire = (function (modules, cache, entry, globalName) 
 
     // RequireJS
     } else if (typeof define === "function" && define.amd) {
-     define(function () {
-       return mainExports;
-     });
+      define(function () {
+        return mainExports;
+      });
 
     // <script>
     } else if (globalName) {
+      // Attach to this parcelRequire
       this[globalName] = mainExports;
     }
   }
